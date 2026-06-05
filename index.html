@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpotiPlay — Spotify Web Player</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000;
+  --text: #fff;
+  --muted: #aaa;
+  --primary: #ff0000;
+  --secondary: #AD4AE7;
+  --green: #1DB954;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+body {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,.1), transparent 30%),
+    radial-gradient(circle at 80% 10%, rgba(255,255,255,.08), transparent 25%),
+    radial-gradient(circle at 50% 90%, rgba(255,255,255,.05), transparent 30%),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container { max-width: 900px; margin: auto; }
+
+/* Profile */
+.profile-wrapper {
+  width: 120px; height: 120px; border-radius: 50%;
+  margin: 0 auto 20px; padding: 5px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  box-shadow: 0 0 25px rgba(173,74,231,.5);
+  animation: glow 4s infinite alternate;
+}
+.profile-wrapper video {
+  width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+}
+@keyframes glow {
+  0% { box-shadow: 0 0 15px var(--primary); }
+  100% { box-shadow: 0 0 30px var(--secondary); }
+}
+
+/* Header */
+.header { text-align: center; margin-bottom: 30px; }
+.title { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 800; }
+.title span { color: var(--green); }
+.subtitle { color: var(--muted); font-size: 14px; margin-top: 5px; }
+
+/* Section */
+.section {
+  background: rgba(255,255,255,.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 18px; padding: 24px;
+  margin-bottom: 24px; position: relative;
+}
+.section::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: 18px 18px 0 0;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+}
+.section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+/* Auth section */
+.input-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.input-group { flex: 1; min-width: 200px; }
+.label { margin-bottom: 6px; font-weight: 600; color: #ddd; font-size: 13px; display: block; }
+.input {
+  width: 100%; padding: 11px 14px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 12px; color: #fff; font-size: 14px;
+  transition: border .2s;
+}
+.input:focus { outline: none; border-color: var(--secondary); }
+.input::placeholder { color: #555; }
+
+.btn {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border: none; border-radius: 12px;
+  color: #fff; font-weight: bold; cursor: pointer;
+  font-size: 14px; transition: opacity .2s;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn:hover { opacity: .85; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-full { width: 100%; justify-content: center; margin-top: 14px; }
+.btn-green {
+  background: linear-gradient(135deg, #1DB954, #17a349);
+}
+
+/* Search */
+.search-row { display: flex; gap: 10px; }
+.search-row .input { flex: 1; }
+.search-row .btn { white-space: nowrap; }
+
+/* Track list */
+.track-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.track-card {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px; padding: 12px;
+  transition: background .2s, border .2s;
+  cursor: pointer;
+}
+.track-card:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.25); }
+.track-card.active { border-color: var(--green); background: rgba(29,185,84,.08); }
+
+.track-img {
+  width: 54px; height: 54px; border-radius: 10px;
+  object-fit: cover; flex-shrink: 0;
+}
+.track-img-placeholder {
+  width: 54px; height: 54px; border-radius: 10px;
+  background: rgba(255,255,255,.1);
+  display: flex; align-items: center; justify-content: center;
+  color: #555; flex-shrink: 0;
+}
+.track-info { flex: 1; overflow: hidden; }
+.track-name {
+  font-weight: 600; font-size: 14px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.track-artist { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.track-duration { color: #666; font-size: 12px; flex-shrink: 0; }
+.track-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #fff; cursor: pointer; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+.icon-btn:hover { background: rgba(255,255,255,.18); }
+.icon-btn.play-btn { background: var(--green); border-color: var(--green); }
+.icon-btn.play-btn:hover { background: #17a349; }
+
+/* Now Playing */
+#nowPlaying { display: none; }
+.now-playing-inner {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+}
+.now-img {
+  width: 90px; height: 90px; border-radius: 14px;
+  object-fit: cover; flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(29,185,84,.3);
+  animation: spin-slow 8s linear infinite paused;
+}
+.now-img.playing { animation-play-state: running; }
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.now-info { flex: 1; min-width: 180px; }
+.now-title { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; }
+.now-artist { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.now-album { color: #555; font-size: 12px; margin-top: 2px; }
+.now-tags { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.tag {
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; letter-spacing: .5px;
+}
+.tag-green { background: rgba(29,185,84,.2); color: var(--green); border: 1px solid rgba(29,185,84,.3); }
+.tag-purple { background: rgba(173,74,231,.2); color: #d080ff; border: 1px solid rgba(173,74,231,.3); }
+
+/* Player controls */
+.player-controls { margin-top: 18px; }
+.progress-bar-wrap {
+  width: 100%; height: 5px; background: rgba(255,255,255,.12);
+  border-radius: 10px; cursor: pointer; position: relative; margin-bottom: 6px;
+}
+.progress-bar-fill {
+  height: 100%; border-radius: 10px;
+  background: linear-gradient(90deg, var(--green), #17a349);
+  transition: width .5s linear;
+  pointer-events: none;
+}
+.progress-times { display: flex; justify-content: space-between; font-size: 11px; color: #666; }
+
+.controls-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; margin-top: 14px;
+}
+.ctrl-btn {
+  background: none; border: none; color: #aaa;
+  cursor: pointer; font-size: 18px; transition: color .2s;
+  padding: 6px;
+}
+.ctrl-btn:hover { color: #fff; }
+.ctrl-btn.main {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--green); color: #fff; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ctrl-btn.main:hover { background: #17a349; }
+.ctrl-btn.active { color: var(--green); }
+
+.volume-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.volume-slider { flex: 1; accent-color: var(--green); cursor: pointer; }
+
+/* Spotify iframe player */
+.spotify-embed { margin-top: 14px; border-radius: 12px; overflow: hidden; display: none; }
+.spotify-embed iframe { width: 100%; border-radius: 12px; }
+
+/* Download */
+.dl-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.dl-btn {
+  flex: 1; min-width: 140px; padding: 10px;
+  border-radius: 12px; font-size: 13px; font-weight: 600;
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  text-decoration: none;
+}
+.dl-mp3 { background: linear-gradient(135deg, #1DB954, #17a349); color: #fff; }
+.dl-mp4 { background: linear-gradient(135deg, #ff0000, #cc0000); color: #fff; }
+
+/* Status */
+.status {
+  text-align: center; padding: 12px; border-radius: 10px;
+  font-size: 13px; margin-top: 12px; display: none;
+}
+.status.loading { display: block; color: var(--secondary); }
+.status.error { display: block; background: rgba(255,0,0,.1); color: #ff6b6b; border: 1px solid rgba(255,0,0,.2); }
+.status.success { display: block; background: rgba(29,185,84,.1); color: var(--green); border: 1px solid rgba(29,185,84,.2); }
+
+.hint { font-size: 12px; color: #666; margin-top: 6px; }
+.badge-auth {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  background: rgba(29,185,84,.15); color: var(--green);
+  border: 1px solid rgba(29,185,84,.3);
+}
+.badge-auth.not { background: rgba(255,0,0,.1); color: #ff6b6b; border-color: rgba(255,0,0,.2); }
+
+.empty-state { text-align: center; color: #555; padding: 30px; font-size: 14px; }
+.empty-state i { font-size: 36px; margin-bottom: 10px; display: block; }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<!-- PROFILE -->
+<div class="profile-wrapper">
+  <video src="https://raw.githubusercontent.com/Alifkece/media/main/uploads/1780631439477_download.mp4" autoplay loop muted playsinline></video>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <h1 class="title">Spoti<span>Play</span></h1>
+  <p class="subtitle">Powered By Aliftzycrt🍓 &nbsp;|&nbsp; Search · Play · Download</p>
+</div>
+
+<!-- AUTH SECTION -->
+<div class="section" id="authSection">
+  <h2 class="section-title"><i class="fab fa-spotify" style="color:var(--green)"></i> Konfigurasi Spotify API</h2>
+  
+  <div class="input-row">
+    <div class="input-group">
+      <label class="label"><i class="fas fa-key"></i> Client ID</label>
+      <input type="text" id="clientId" class="input" placeholder="Masukkan Client ID kamu...">
+    </div>
+    <div class="input-group">
+      <label class="label"><i class="fas fa-lock"></i> Client Secret</label>
+      <input type="password" id="clientSecret" class="input" placeholder="Masukkan Client Secret kamu...">
+    </div>
+  </div>
+
+  <div class="hint">💡 Dapatkan di <a href="https://developer.spotify.com/dashboard" target="_blank" style="color:var(--green)">developer.spotify.com/dashboard</a></div>
+
+  <button class="btn btn-full" onclick="authenticate()">
+    <i class="fas fa-plug"></i> Connect ke Spotify
+  </button>
+  <div class="status" id="authStatus"></div>
+</div>
+
+<!-- SEARCH SECTION -->
+<div class="section">
+  <h2 class="section-title">
+    <i class="fas fa-search" style="color:var(--secondary)"></i> Cari Musik
+    <span id="authBadge" class="badge-auth not" style="margin-left:auto;font-size:11px">
+      <i class="fas fa-circle"></i> Belum Konek
+    </span>
+  </h2>
+
+  <div class="search-row">
+    <input type="text" id="searchQuery" class="input" placeholder="Cari lagu, artis, album..." onkeydown="if(event.key==='Enter')searchTracks()">
+    <button class="btn" onclick="searchTracks()"><i class="fas fa-search"></i> Cari</button>
+  </div>
+
+  <div class="status" id="searchStatus"></div>
+  <div class="track-list" id="trackList">
+    <div class="empty-state">
+      <i class="fab fa-spotify" style="color:#333"></i>
+      Hubungkan API dulu, lalu cari lagu favoritmu!
+    </div>
+  </div>
+</div>
+
+<!-- NOW PLAYING -->
+<div class="section" id="nowPlaying">
+  <h2 class="section-title"><i class="fas fa-music" style="color:var(--green)"></i> Now Playing</h2>
+  
+  <div class="now-playing-inner">
+    <img id="nowImg" class="now-img" src="" alt="cover">
+    <div class="now-info">
+      <div class="now-title" id="nowTitle">—</div>
+      <div class="now-artist" id="nowArtist">—</div>
+      <div class="now-album" id="nowAlbum">—</div>
+      <div class="now-tags">
+        <span class="tag tag-green" id="nowPopularity"></span>
+        <span class="tag tag-purple" id="nowDuration"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spotify Embed Player -->
+  <div class="spotify-embed" id="spotifyEmbed">
+    <iframe id="spotifyIframe" src="" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+  </div>
+
+  <!-- Download buttons -->
+  <div class="dl-row" id="dlRow">
+    <button class="dl-btn dl-mp3" onclick="downloadTrack('mp3')">
+      <i class="fas fa-music"></i> Download MP3
+    </button>
+    <button class="dl-btn dl-mp4" onclick="downloadTrack('mp4')">
+      <i class="fas fa-video"></i> Download MP4
+    </button>
+  </div>
+  <div class="hint" style="margin-top:8px">⚠️ Download menggunakan layanan pihak ketiga (yt-dlp API). Pastikan lagu tersedia di YouTube.</div>
+  <div class="status" id="dlStatus"></div>
+</div>
+
+<!-- INFO -->
+<div class="section">
+  <h2 class="section-title"><i class="fas fa-info-circle" style="color:var(--secondary)"></i> Cara Pakai</h2>
+  <ul style="margin-left:20px;line-height:2">
+    <li>Masukkan <b>Client ID</b> & <b>Client Secret</b> dari Spotify Developer</li>
+    <li>Klik <b>Connect ke Spotify</b> untuk autentikasi</li>
+    <li>Cari lagu di kolom pencarian</li>
+    <li>Klik lagu untuk melihat info & memutar preview</li>
+    <li>Klik <b>Download MP3/MP4</b> untuk mengunduh</li>
+  </ul>
+  <div style="margin-top:15px;background:rgba(173,74,231,.1);border-left:4px solid #fff900;padding:15px;border-radius:8px">
+    <i class="fas fa-lightbulb"></i>
+    <b> Note:</b> Spotify hanya menyediakan preview 30 detik untuk akun gratis. Untuk full track, gunakan fitur Download.
+  </div>
+</div>
+
+</div><!-- end container -->
+
+<script>
+// =====================
+// CONFIG — ISI DI SINI
+// =====================
+let ACCESS_TOKEN = '';
+let currentTrack = null;
+
+// =====================
+// AUTH
+// =====================
+async function authenticate() {
+  const clientId = document.getElementById('clientId').value.trim();
+  const clientSecret = document.getElementById('clientSecret').value.trim();
+  
+  if (!clientId || !clientSecret) {
+    showStatus('authStatus', 'error', '❌ Client ID dan Client Secret wajib diisi!');
+    return;
+  }
+
+  showStatus('authStatus', 'loading', '<i class="fas fa-spinner fa-spin"></i> Menghubungkan ke Spotify...');
+
+  try {
+    const res = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
+      },
+      body: 'grant_type=client_credentials'
+    });
+
+    const data = await res.json();
+
+    if (data.access_token) {
+      ACCESS_TOKEN = data.access_token;
+      showStatus('authStatus', 'success', '✅ Berhasil konek ke Spotify!');
+      document.getElementById('authBadge').innerHTML = '<i class="fas fa-circle"></i> Terhubung';
+      document.getElementById('authBadge').className = 'badge-auth';
+      
+      // Auto expire token setelah 1 jam
+      setTimeout(() => {
+        ACCESS_TOKEN = '';
+        document.getElementById('authBadge').innerHTML = '<i class="fas fa-circle"></i> Token Expired';
+        document.getElementById('authBadge').className = 'badge-auth not';
+      }, 3500000);
+    } else {
+      showStatus('authStatus', 'error', '❌ Gagal: ' + (data.error_description || 'Client ID/Secret salah'));
+    }
+  } catch (e) {
+    showStatus('authStatus', 'error', '❌ Gagal konek. Cek koneksi internet kamu!');
+  }
+}
+
+// =====================
+// SEARCH
+// =====================
+async function searchTracks() {
+  if (!ACCESS_TOKEN) {
+    showStatus('searchStatus', 'error', '❌ Konek ke Spotify dulu!');
+    return;
+  }
+
+  const q = document.getElementById('searchQuery').value.trim();
+  if (!q) return;
+
+  showStatus('searchStatus', 'loading', '<i class="fas fa-spinner fa-spin"></i> Mencari lagu...');
+  document.getElementById('trackList').innerHTML = '';
+
+  try {
+    const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track&limit=10`, {
+      headers: { 'Authorization': 'Bearer ' + ACCESS_TOKEN }
+    });
+    const data = await res.json();
+
+    if (!data.tracks || data.tracks.items.length === 0) {
+      showStatus('searchStatus', 'error', '😔 Lagu tidak ditemukan');
+      return;
+    }
+
+    showStatus('searchStatus', '', '');
+    document.getElementById('searchStatus').style.display = 'none';
+
+    const list = document.getElementById('trackList');
+    list.innerHTML = '';
+
+    data.tracks.items.forEach(track => {
+      const img = track.album.images[0]?.url || '';
+      const artists = track.artists.map(a => a.name).join(', ');
+      const dur = msToTime(track.duration_ms);
+
+      const card = document.createElement('div');
+      card.className = 'track-card';
+      card.dataset.id = track.id;
+      card.innerHTML = `
+        ${img 
+          ? `<img class="track-img" src="${img}" alt="cover" loading="lazy">`
+          : `<div class="track-img-placeholder"><i class="fas fa-music"></i></div>`
+        }
+        <div class="track-info">
+          <div class="track-name">${track.name}</div>
+          <div class="track-artist">${artists} · ${track.album.name}</div>
+        </div>
+        <div class="track-duration">${dur}</div>
+        <div class="track-actions">
+          <button class="icon-btn play-btn" onclick="playTrack(event, '${track.id}')" title="Play Preview">
+            <i class="fas fa-play"></i>
+          </button>
+        </div>
+      `;
+      card.onclick = (e) => {
+        if (e.target.closest('.icon-btn')) return;
+        loadTrackInfo(track);
+      };
+      list.appendChild(card);
+    });
+  } catch (e) {
+    showStatus('searchStatus', 'error', '❌ Gagal search. Coba lagi!');
+  }
+}
+
+// =====================
+// LOAD TRACK INFO
+// =====================
+function loadTrackInfo(track) {
+  currentTrack = track;
+
+  // Highlight active
+  document.querySelectorAll('.track-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-id="${track.id}"]`)?.classList.add('active');
+
+  const img = track.album.images[0]?.url || '';
+  const artists = track.artists.map(a => a.name).join(', ');
+  const dur = msToTime(track.duration_ms);
+
+  document.getElementById('nowImg').src = img;
+  document.getElementById('nowTitle').textContent = track.name;
+  document.getElementById('nowArtist').textContent = artists;
+  document.getElementById('nowAlbum').textContent = '📀 ' + track.album.name + ' (' + track.album.release_date?.slice(0,4) + ')';
+  document.getElementById('nowPopularity').textContent = '🔥 Popularity: ' + track.popularity + '/100';
+  document.getElementById('nowDuration').textContent = '⏱ ' + dur;
+
+  document.getElementById('nowPlaying').style.display = 'block';
+  document.getElementById('dlStatus').style.display = 'none';
+
+  // Spotify embed
+  document.getElementById('spotifyIframe').src = `https://open.spotify.com/embed/track/${track.id}?utm_source=generator&theme=0`;
+  document.getElementById('spotifyEmbed').style.display = 'block';
+}
+
+// =====================
+// PLAY PREVIEW
+// =====================
+function playTrack(e, id) {
+  e.stopPropagation();
+  // Scroll to now playing
+  const el = document.getElementById('nowPlaying');
+  if (!currentTrack || currentTrack.id !== id) {
+    // Find track in list
+    const card = document.querySelector(`[data-id="${id}"]`);
+    if (card) card.click();
+  }
+  el.scrollIntoView({ behavior: 'smooth' });
+}
+
+// =====================
+// DOWNLOAD
+// =====================
+async function downloadTrack(format) {
+  if (!currentTrack) {
+    showStatus('dlStatus', 'error', '❌ Pilih lagu dulu!');
+    return;
+  }
+
+  const query = `${currentTrack.name} ${currentTrack.artists.map(a=>a.name).join(' ')}`;
+  showStatus('dlStatus', 'loading', `<i class="fas fa-spinner fa-spin"></i> Mencari & memproses ${format.toUpperCase()}...`);
+
+  try {
+    // Pakai API cobain dulu lewat yt-dlp wrapper publik
+    // Alternatif: pakai y2mate, rapidapi, atau backend sendiri
+    const apiUrl = `https://api.fabdl.com/spotify/get?url=https://open.spotify.com/track/${currentTrack.id}`;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+
+    if (data && data.result && data.result.download_url) {
+      showStatus('dlStatus', 'success', '✅ Siap download! Klik link di bawah.');
+      const a = document.createElement('a');
+      a.href = data.result.download_url;
+      a.download = `${currentTrack.name} - ${currentTrack.artists[0].name}.${format}`;
+      a.target = '_blank';
+      a.click();
+    } else {
+      // Fallback: buka di Spotify web
+      fallbackDownload(query, format);
+    }
+  } catch(e) {
+    fallbackDownload(query, format);
+  }
+}
+
+function fallbackDownload(query, format) {
+  // Fallback ke y2mate search
+  const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+  showStatus('dlStatus', 'error', 
+    `⚠️ API download tidak tersedia langsung. <br>
+    <a href="${ytUrl}" target="_blank" style="color:var(--green)">
+      <i class="fas fa-external-link-alt"></i> Cari di YouTube
+    </a> lalu download manual pakai yt-dlp atau y2mate.`
+  );
+}
+
+// =====================
+// UTILS
+// =====================
+function msToTime(ms) {
+  const m = Math.floor(ms / 60000);
+  const s = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function showStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status ' + type;
+  el.innerHTML = msg;
+  if (type) el.style.display = 'block';
+  else el.style.display = 'none';
+}
+</script>
+</body>
+</html>
