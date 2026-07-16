@@ -310,23 +310,42 @@ body {
     <li>Cari musik berdasarkan judul, artis, maupun nama album.</li>
     <li>Klik pada baris lagu untuk memuat info lagu & mengaktifkan kontrol audio.</li>
     <li>Gunakan pemutar audio terintegrasi untuk mendengarkan lagu secara penuh.</li>
-    <li>Jika tombol Download diklik, Anda akan mendapatkan file MP3 instan berkualitas tinggi.</li>
+    <li>Klik tombol Download untuk mengunduh musik instan secara langsung.</li>
   </ul>
 </div>
 
 </div>
 
 <script>
-// Base URL API KyzzNeKoo Play & Search
 const PLAY_BASE_URL = "https://kyzznekoo.zone.id/api/play/spotify?url=";
 const SEARCH_BASE_URL = "https://kyzznekoo.zone.id/api/search/spotify?q=";
 
-// Proxy Bypass CORS Gratis agar bisa dimainkan langsung secara lokal dari browser
-const CORS_PROXY = "https://corsproxy.io/?url=";
+// Menggunakan multi-proxy untuk jaminan bypass CORS di GitHub Pages
+const PROXIES = [
+  "https://api.allorigins.win/raw?url=",
+  "https://corsproxy.io/?url="
+];
 
 let currentTrack = null;
 const audioPlayer = new Audio();
 audioPlayer.crossOrigin = "anonymous";
+
+// Fetch dengan proteksi fallback proxy
+async function fetchWithProxyFallback(originalUrl) {
+  let lastError = null;
+  for (let proxy of PROXIES) {
+    try {
+      const targetUrl = proxy + encodeURIComponent(originalUrl);
+      const res = await fetch(targetUrl);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError || new Error("Semua proxy gagal");
+}
 
 // =====================
 // AUDIO PLAYER ENGINE
@@ -361,8 +380,8 @@ audioPlayer.addEventListener('ended', () => {
 });
 
 audioPlayer.addEventListener('error', (e) => {
-  console.error("Audio error caught:", e);
-  showStatus('dlStatus', 'error', '⚠️ Gagal streaming langsung karena batasan server audio. Kamu tetap bisa klik tombol "Download MP3" di bawah untuk mengunduh lagu ini secara instan!');
+  console.error("Audio error:", e);
+  showStatus('dlStatus', 'error', '⚠️ Streaming langsung tidak didukung jenis file server ini. Silakan klik tombol "Download MP3" di bawah untuk mengunduh lagunya secara langsung.');
 });
 
 function togglePlay() {
@@ -371,12 +390,9 @@ function togglePlay() {
     return;
   }
   if (audioPlayer.paused) {
-    const playPromise = audioPlayer.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(error => {
-        showStatus('dlStatus', 'error', '❌ Playback ditolak browser. Coba klik langsung tombol "Download MP3".');
-      });
-    }
+    audioPlayer.play().catch(e => {
+      showStatus('dlStatus', 'error', '❌ Playback error. Silakan langsung unduh musik menggunakan tombol hijau.');
+    });
   } else {
     audioPlayer.pause();
   }
@@ -420,11 +436,7 @@ async function searchTracks() {
   document.getElementById('trackList').innerHTML = '';
 
   try {
-    // Kita gunakan CORS Proxy agar pencarian lokal berjalan lancar tanpa CORS error
-    const reqUrl = CORS_PROXY + encodeURIComponent(`${SEARCH_BASE_URL}${encodeURIComponent(q)}`);
-    const res = await fetch(reqUrl);
-    const data = await res.json();
-
+    const data = await fetchWithProxyFallback(`${SEARCH_BASE_URL}${encodeURIComponent(q)}`);
     const items = data.songs || data.result || data.data || [];
 
     if (items.length === 0) {
@@ -440,7 +452,13 @@ async function searchTracks() {
 
     items.forEach((track, index) => {
       // Perbaikan pembacaan key image & thumbnail response API Kyzznekoo
-      const img = track.thumbnail || track.image || track.cover || (track.album && track.album.cover) || '';
+      let img = track.thumbnail || track.image || track.cover || (track.album && track.album.cover) || '';
+      
+      // Mengatasi URL gambar spotify yang tidak menggunakan HTTPS agar tidak diblokir
+      if (img && img.startsWith('http://')) {
+        img = img.replace('http://', 'https://');
+      }
+
       const artist = track.artist || track.author || (track.artists && track.artists[0]?.name) || 'Unknown Artist';
       const title = track.title || track.name || 'Unknown Title';
       const albumName = track.album?.name || track.album || 'Single';
@@ -482,7 +500,7 @@ async function searchTracks() {
       list.appendChild(card);
     });
   } catch (e) {
-    showStatus('searchStatus', 'error', '❌ Gagal melakukan pencarian karena gangguan koneksi API.');
+    showStatus('searchStatus', 'error', '❌ Gagal melakukan pencarian karena gangguan server API atau CORS.');
   }
 }
 
@@ -518,13 +536,9 @@ async function loadTrackInfo(track, elementId) {
 
   try {
     const targetUrl = track.computedLink;
-    // Menggunakan CORS Proxy agar request local file lolos filter browser
-    const reqUrl = CORS_PROXY + encodeURIComponent(`${PLAY_BASE_URL}${encodeURIComponent(targetUrl)}`);
-    const res = await fetch(reqUrl);
-    const dlData = await res.json();
+    const dlData = await fetchWithProxyFallback(`${PLAY_BASE_URL}${encodeURIComponent(targetUrl)}`);
     
     let audioUrl = '';
-    // Membaca object response download KyzzNekoo
     if (dlData && dlData.songs && dlData.songs[0] && dlData.songs[0].url) {
       audioUrl = dlData.songs[0].url;
     } else if (dlData && dlData.result && dlData.result.url) {
@@ -540,12 +554,9 @@ async function loadTrackInfo(track, elementId) {
       showStatus('dlStatus', '', '');
       document.getElementById('dlStatus').style.display = 'none';
       
-      const playPromise = audioPlayer.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(e => {
-          showStatus('dlStatus', 'success', '✅ Musik termuat! Klik tombol Play (Segitiga Hijau) untuk mendengarkan.');
-        });
-      }
+      audioPlayer.play().catch(e => {
+        showStatus('dlStatus', 'success', '✅ Musik termuat! Silakan ketuk tombol Play Hijau untuk mendengarkan.');
+      });
     } else {
       showStatus('dlStatus', 'error', '❌ Link streaming musik gagal dibuat oleh server.');
     }
@@ -582,9 +593,7 @@ async function downloadTrack() {
     let finalDownloadUrl = currentTrack.targetAudioUrl;
 
     if (!finalDownloadUrl) {
-      const reqUrl = CORS_PROXY + encodeURIComponent(`${PLAY_BASE_URL}${encodeURIComponent(currentTrack.computedLink)}`);
-      const res = await fetch(reqUrl);
-      const data = await res.json();
+      const data = await fetchWithProxyFallback(`${PLAY_BASE_URL}${encodeURIComponent(currentTrack.computedLink)}`);
 
       if (data && data.songs && data.songs[0] && data.songs[0].url) {
         finalDownloadUrl = data.songs[0].url;
