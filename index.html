@@ -73,10 +73,11 @@ body {
   display: flex; align-items: center; gap: 10px;
 }
 
-/* Auth section */
-.input-row { display: flex; gap: 10px; flex-wrap: wrap; }
-.input-group { flex: 1; min-width: 200px; }
-.label { margin-bottom: 6px; font-weight: 600; color: #ddd; font-size: 13px; display: block; }
+/* Search */
+.search-row { display: flex; gap: 10px; }
+.search-row .input { flex: 1; }
+.search-row .btn { white-space: nowrap; }
+
 .input {
   width: 100%; padding: 11px 14px;
   background: rgba(255,255,255,.08);
@@ -96,16 +97,6 @@ body {
   display: flex; align-items: center; gap: 8px;
 }
 .btn:hover { opacity: .85; }
-.btn:disabled { opacity: .5; cursor: not-allowed; }
-.btn-full { width: 100%; justify-content: center; margin-top: 14px; }
-.btn-green {
-  background: linear-gradient(135deg, #1DB954, #17a349);
-}
-
-/* Search */
-.search-row { display: flex; gap: 10px; }
-.search-row .input { flex: 1; }
-.search-row .btn { white-space: nowrap; }
 
 /* Track list */
 .track-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
@@ -207,14 +198,9 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 .ctrl-btn.main:hover { background: #17a349; }
-.ctrl-btn.active { color: var(--green); }
 
 .volume-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
 .volume-slider { flex: 1; accent-color: var(--green); cursor: pointer; }
-
-/* Spotify iframe player */
-.spotify-embed { margin-top: 14px; border-radius: 12px; overflow: hidden; display: none; }
-.spotify-embed iframe { width: 100%; border-radius: 12px; }
 
 /* Download */
 .dl-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
@@ -225,7 +211,6 @@ body {
   text-decoration: none;
 }
 .dl-mp3 { background: linear-gradient(135deg, #1DB954, #17a349); color: #fff; }
-.dl-mp4 { background: linear-gradient(135deg, #ff0000, #cc0000); color: #fff; }
 
 /* Status */
 .status {
@@ -237,13 +222,6 @@ body {
 .status.success { display: block; background: rgba(29,185,84,.1); color: var(--green); border: 1px solid rgba(29,185,84,.2); }
 
 .hint { font-size: 12px; color: #666; margin-top: 6px; }
-.badge-auth {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
-  background: rgba(29,185,84,.15); color: var(--green);
-  border: 1px solid rgba(29,185,84,.3);
-}
-.badge-auth.not { background: rgba(255,0,0,.1); color: #ff6b6b; border-color: rgba(255,0,0,.2); }
 
 .empty-state { text-align: center; color: #555; padding: 30px; font-size: 14px; }
 .empty-state i { font-size: 36px; margin-bottom: 10px; display: block; }
@@ -291,7 +269,7 @@ body {
       <div class="now-artist" id="nowArtist">—</div>
       <div class="now-album" id="nowAlbum">—</div>
       <div class="now-tags">
-        <span class="tag tag-green" id="nowPopularity" style="display:none;"></span>
+        <span class="tag tag-green" id="nowPopularity">🔥 Popularity: —</span>
         <span class="tag tag-purple" id="nowDuration">⏱ 0:00</span>
       </div>
     </div>
@@ -317,19 +295,12 @@ body {
     </div>
   </div>
 
-  <div class="spotify-embed" id="spotifyEmbed">
-    <iframe id="spotifyIframe" src="" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-  </div>
-
   <div class="dl-row" id="dlRow">
     <button class="dl-btn dl-mp3" onclick="downloadTrack()">
       <i class="fas fa-music"></i> Download MP3
     </button>
-    <button class="dl-btn dl-mp4" style="display: none;" disabled>
-      <i class="fas fa-video"></i> Download MP4
-    </button>
   </div>
-  <div class="hint" style="margin-top:8px">⚠️ Unduhan langsung dialirkan melalui basis server API KyzzNeKoo berkualitas penuh.</div>
+  <div class="hint" style="margin-top:8px">⚠️ Unduhan & pemutaran musik dialirkan langsung melalui basis server API KyzzNeKoo berkualitas penuh.</div>
   <div class="status" id="dlStatus"></div>
 </div>
 
@@ -343,15 +314,14 @@ body {
   </ul>
   <div style="margin-top:15px;background:rgba(173,74,231,.1);border-left:4px solid #fff900;padding:15px;border-radius:8px">
     <i class="fas fa-lightbulb"></i>
-    <b> Note:</b> Pemutar media sekarang memutar lagu penuh berdurasi total secara real-time langsung melalui stream audio API KyzzNeKoo.
+    <b> Note:</b> Jika lagu tidak berputar saat dibuka lokal, Anda harus men-deploy web ini ke platform hosting gratis seperti GitHub Pages, Vercel, atau Netlify untuk menghindari batasan CORS browser lokal.
   </div>
 </div>
 
-</div>
-
-<script>
-// Langsung disematkan di file HTML/JS sesuai instruksi personal use kamu
-const BASE_URL = "https://kyzznekoo.zone.id/api/play/spotify?url=";
+</div><script>
+// Base URL API KyzzNeKoo Play & Search
+const PLAY_BASE_URL = "https://kyzznekoo.zone.id/api/play/spotify?url=";
+const SEARCH_BASE_URL = "https://kyzznekoo.zone.id/api/search/spotify?q=";
 
 let currentTrack = null;
 const audioPlayer = new Audio();
@@ -391,7 +361,7 @@ audioPlayer.addEventListener('ended', () => {
 
 audioPlayer.addEventListener('error', (e) => {
   console.error("Audio error caught:", e);
-  showStatus('dlStatus', 'error', '⚠️ Stream gagal diakses lokal (CORS). Silakan deploy file HTML ini ke Vercel/Netlify/GitHub Pages agar pemutar berfungsi 100% lancar tanpa blokir browser.');
+  showStatus('dlStatus', 'error', '⚠️ Gagal memutar secara langsung (CORS lokal browser). Silakan lakukan DEPLOY file HTML ini terlebih dahulu, atau klik tombol "Download MP3" untuk langsung mengambil audionya.');
 });
 
 function togglePlay() {
@@ -403,7 +373,7 @@ function togglePlay() {
     const playPromise = audioPlayer.play();
     if (playPromise !== undefined) {
       playPromise.catch(error => {
-        showStatus('dlStatus', 'error', '❌ Playback ditolak. Silakan deploy website ini ke hosting gratis atau gunakan tombol download.');
+        showStatus('dlStatus', 'error', '❌ Playback dihentikan browser lokal (CORS). Coba deploy web ini agar langsung lancar.');
       });
     }
   } else {
@@ -449,11 +419,10 @@ async function searchTracks() {
   document.getElementById('trackList').innerHTML = '';
 
   try {
-    // Memakai endpoint pencarian KyzzNeKoo Spotify Search
-    const res = await fetch(`https://kyzznekoo.zone.id/api/search/spotify?q=${encodeURIComponent(q)}`);
+    const res = await fetch(`${SEARCH_BASE_URL}${encodeURIComponent(q)}`);
     const data = await res.json();
 
-    // Mapping fleksibel data response
+    // Mapping fleksibel data response pencarian KyzzNeKoo
     const items = data.songs || data.result || data.data || [];
 
     if (items.length === 0) {
@@ -468,7 +437,7 @@ async function searchTracks() {
     list.innerHTML = '';
 
     items.forEach((track, index) => {
-      // Perbaikan pembacaan key thumbnail agar gambar cover selalu muncul stabil
+      // Menangkap nama key thumbnail dengan aman agar cover muncul
       const img = track.thumbnail || track.image || track.cover || (track.album && track.album.cover) || '';
       const artist = track.artist || track.author || (track.artists && track.artists[0]?.name) || 'Unknown Artist';
       const title = track.title || track.name || 'Unknown Title';
@@ -511,7 +480,7 @@ async function searchTracks() {
       list.appendChild(card);
     });
   } catch (e) {
-    showStatus('searchStatus', 'error', '❌ Gagal melakukan pencarian karena batasan local CORS. Silakan deploy terlebih dahulu.');
+    showStatus('searchStatus', 'error', '❌ Gagal melakukan pencarian karena batasan CORS lokal browser. Silakan lakukan deploy.');
   }
 }
 
@@ -529,10 +498,10 @@ async function loadTrackInfo(track, elementId) {
   document.getElementById('nowTitle').textContent = track.computedTitle;
   document.getElementById('nowArtist').textContent = track.computedArtist;
   document.getElementById('nowAlbum').textContent = '📀 ' + track.computedAlbum;
+  document.getElementById('nowPopularity').textContent = '🔥 Popularity: ' + (track.popularity || 'N/A') + '/100';
 
   document.getElementById('nowPlaying').style.display = 'block';
   document.getElementById('dlStatus').style.display = 'none';
-  document.getElementById('spotifyEmbed').style.display = 'none';
 
   // Reset audio engine
   audioPlayer.pause();
@@ -542,12 +511,11 @@ async function loadTrackInfo(track, elementId) {
   document.getElementById('currentTime').textContent = '0:00';
   document.getElementById('totalDuration').textContent = 'Loading...';
 
-  showStatus('dlStatus', 'loading', '<i class="fas fa-spinner fa-spin"></i> Menghubungkan ke API KyzzNeKoo...');
+  showStatus('dlStatus', 'loading', '<i class="fas fa-spinner fa-spin"></i> Menghubungkan ke API Stream...');
 
   try {
-    // Langsung hit ke core endpoint play download menggunakan track link spotify
     const targetUrl = track.computedLink;
-    const res = await fetch(`${BASE_URL}${encodeURIComponent(targetUrl)}`);
+    const res = await fetch(`${PLAY_BASE_URL}${encodeURIComponent(targetUrl)}`);
     const dlData = await res.json();
     
     let audioUrl = '';
@@ -567,14 +535,14 @@ async function loadTrackInfo(track, elementId) {
       const playPromise = audioPlayer.play();
       if (playPromise !== undefined) {
         playPromise.catch(e => {
-          showStatus('dlStatus', 'success', '✅ Musik termuat. Klik tombol Play di panel kontrol tengah untuk memutar.');
+          showStatus('dlStatus', 'success', '✅ Musik berhasil dimuat. Klik Play pada tombol hijau untuk memutar.');
         });
       }
     } else {
-      showStatus('dlStatus', 'error', '❌ API KyzzNeKoo tidak mengembalikan link streaming audio untuk lagu ini.');
+      showStatus('dlStatus', 'error', '❌ Gagal mendapatkan jalur file lagu dari server API.');
     }
   } catch (err) {
-    showStatus('dlStatus', 'error', '❌ Gagal memuat stream data dari file lokal karena proteksi CORS browser. Solusinya web ini wajib kamu deploy.');
+    showStatus('dlStatus', 'error', '❌ Gagal memuat stream data. Web wajib dideploy agar tidak terhalang CORS browser lokal.');
   }
 }
 
@@ -606,7 +574,7 @@ async function downloadTrack() {
     let finalDownloadUrl = currentTrack.targetAudioUrl;
 
     if (!finalDownloadUrl) {
-      const res = await fetch(`${BASE_URL}${encodeURIComponent(currentTrack.computedLink)}`);
+      const res = await fetch(`${PLAY_BASE_URL}${encodeURIComponent(currentTrack.computedLink)}`);
       const data = await res.json();
 
       if (data && data.songs && data.songs[0] && data.songs[0].url) {
@@ -617,13 +585,13 @@ async function downloadTrack() {
     }
 
     if (finalDownloadUrl) {
-      showStatus('dlStatus', 'success', `✅ Tautan siap! <a href="${finalDownloadUrl}" target="_blank" style="color:var(--green); font-weight:bold; text-decoration:underline;">Klik di sini untuk unduh langsung</a>`);
+      showStatus('dlStatus', 'success', `✅ Tautan siap! <a href="${finalDownloadUrl}" target="_blank" style="color:var(--green); font-weight:bold; text-decoration:underline;">Klik di sini untuk mendownload langsung</a>`);
       window.open(finalDownloadUrl, '_blank');
     } else {
-      showStatus('dlStatus', 'error', '❌ Gagal memproses data download.');
+      showStatus('dlStatus', 'error', '❌ Gagal membuat tautan unduhan.');
     }
   } catch (e) {
-    showStatus('dlStatus', 'error', '❌ Terjadi kesalahan sistem saat mendownload akibat file dijalankan lokal.');
+    showStatus('dlStatus', 'error', '❌ Terjadi kesalahan jaringan. Silakan deploy website ini agar dapat mengunduh.');
   }
 }
 
@@ -637,3 +605,4 @@ function showStatus(id, type, msg) {
 </script>
 </body>
 </html>
+
