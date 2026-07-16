@@ -307,21 +307,22 @@ body {
 <div class="section">
   <h2 class="section-title"><i class="fas fa-info-circle" style="color:var(--secondary)"></i> Cara Pakai</h2>
   <ul style="margin-left:20px;line-height:2">
-    <li>Cari musik berdasarkan judul, artis, maupun nama album</li>
-    <li>Klik pada baris lagu untuk memuat info lagu & mengaktifkan kontrol audio</li>
-    <li>Gunakan pemutar audio HTML5 terintegrasi untuk mendengarkan lagu secara penuh</li>
-    <li>Klik tombol <b>Download MP3</b> untuk mengunduh lagu berkualitas premium</li>
+    <li>Cari musik berdasarkan judul, artis, maupun nama album.</li>
+    <li>Klik pada baris lagu untuk memuat info lagu & mengaktifkan kontrol audio.</li>
+    <li>Gunakan pemutar audio terintegrasi untuk mendengarkan lagu secara penuh.</li>
+    <li>Jika tombol Download diklik, Anda akan mendapatkan file MP3 instan berkualitas tinggi.</li>
   </ul>
-  <div style="margin-top:15px;background:rgba(173,74,231,.1);border-left:4px solid #fff900;padding:15px;border-radius:8px">
-    <i class="fas fa-lightbulb"></i>
-    <b> Note:</b> Jika lagu tidak berputar saat dibuka lokal, Anda harus men-deploy web ini ke platform hosting gratis seperti GitHub Pages, Vercel, atau Netlify untuk menghindari batasan CORS browser lokal.
-  </div>
 </div>
 
-</div><script>
+</div>
+
+<script>
 // Base URL API KyzzNeKoo Play & Search
 const PLAY_BASE_URL = "https://kyzznekoo.zone.id/api/play/spotify?url=";
 const SEARCH_BASE_URL = "https://kyzznekoo.zone.id/api/search/spotify?q=";
+
+// Proxy Bypass CORS Gratis agar bisa dimainkan langsung secara lokal dari browser
+const CORS_PROXY = "https://corsproxy.io/?url=";
 
 let currentTrack = null;
 const audioPlayer = new Audio();
@@ -361,7 +362,7 @@ audioPlayer.addEventListener('ended', () => {
 
 audioPlayer.addEventListener('error', (e) => {
   console.error("Audio error caught:", e);
-  showStatus('dlStatus', 'error', '⚠️ Gagal memutar secara langsung (CORS lokal browser). Silakan lakukan DEPLOY file HTML ini terlebih dahulu, atau klik tombol "Download MP3" untuk langsung mengambil audionya.');
+  showStatus('dlStatus', 'error', '⚠️ Gagal streaming langsung karena batasan server audio. Kamu tetap bisa klik tombol "Download MP3" di bawah untuk mengunduh lagu ini secara instan!');
 });
 
 function togglePlay() {
@@ -373,7 +374,7 @@ function togglePlay() {
     const playPromise = audioPlayer.play();
     if (playPromise !== undefined) {
       playPromise.catch(error => {
-        showStatus('dlStatus', 'error', '❌ Playback dihentikan browser lokal (CORS). Coba deploy web ini agar langsung lancar.');
+        showStatus('dlStatus', 'error', '❌ Playback ditolak browser. Coba klik langsung tombol "Download MP3".');
       });
     }
   } else {
@@ -419,10 +420,11 @@ async function searchTracks() {
   document.getElementById('trackList').innerHTML = '';
 
   try {
-    const res = await fetch(`${SEARCH_BASE_URL}${encodeURIComponent(q)}`);
+    // Kita gunakan CORS Proxy agar pencarian lokal berjalan lancar tanpa CORS error
+    const reqUrl = CORS_PROXY + encodeURIComponent(`${SEARCH_BASE_URL}${encodeURIComponent(q)}`);
+    const res = await fetch(reqUrl);
     const data = await res.json();
 
-    // Mapping fleksibel data response pencarian KyzzNeKoo
     const items = data.songs || data.result || data.data || [];
 
     if (items.length === 0) {
@@ -437,7 +439,7 @@ async function searchTracks() {
     list.innerHTML = '';
 
     items.forEach((track, index) => {
-      // Menangkap nama key thumbnail dengan aman agar cover muncul
+      // Perbaikan pembacaan key image & thumbnail response API Kyzznekoo
       const img = track.thumbnail || track.image || track.cover || (track.album && track.album.cover) || '';
       const artist = track.artist || track.author || (track.artists && track.artists[0]?.name) || 'Unknown Artist';
       const title = track.title || track.name || 'Unknown Title';
@@ -480,7 +482,7 @@ async function searchTracks() {
       list.appendChild(card);
     });
   } catch (e) {
-    showStatus('searchStatus', 'error', '❌ Gagal melakukan pencarian karena batasan CORS lokal browser. Silakan lakukan deploy.');
+    showStatus('searchStatus', 'error', '❌ Gagal melakukan pencarian karena gangguan koneksi API.');
   }
 }
 
@@ -494,6 +496,7 @@ async function loadTrackInfo(track, elementId) {
   const activeCard = document.querySelector(`[data-id="${elementId}"]`);
   if (activeCard) activeCard.classList.add('active');
 
+  // Mengubah cover album Now Playing secara instan tanpa pecah
   document.getElementById('nowImg').src = track.computedImg || 'https://placehold.co/150/222/fff?text=Music';
   document.getElementById('nowTitle').textContent = track.computedTitle;
   document.getElementById('nowArtist').textContent = track.computedArtist;
@@ -503,7 +506,7 @@ async function loadTrackInfo(track, elementId) {
   document.getElementById('nowPlaying').style.display = 'block';
   document.getElementById('dlStatus').style.display = 'none';
 
-  // Reset audio engine
+  // Reset Audio
   audioPlayer.pause();
   audioPlayer.removeAttribute('src');
   audioPlayer.load();
@@ -515,14 +518,19 @@ async function loadTrackInfo(track, elementId) {
 
   try {
     const targetUrl = track.computedLink;
-    const res = await fetch(`${PLAY_BASE_URL}${encodeURIComponent(targetUrl)}`);
+    // Menggunakan CORS Proxy agar request local file lolos filter browser
+    const reqUrl = CORS_PROXY + encodeURIComponent(`${PLAY_BASE_URL}${encodeURIComponent(targetUrl)}`);
+    const res = await fetch(reqUrl);
     const dlData = await res.json();
     
     let audioUrl = '';
+    // Membaca object response download KyzzNekoo
     if (dlData && dlData.songs && dlData.songs[0] && dlData.songs[0].url) {
       audioUrl = dlData.songs[0].url;
     } else if (dlData && dlData.result && dlData.result.url) {
       audioUrl = dlData.result.url;
+    } else if (dlData && dlData.url) {
+      audioUrl = dlData.url;
     }
 
     if (audioUrl) {
@@ -535,14 +543,14 @@ async function loadTrackInfo(track, elementId) {
       const playPromise = audioPlayer.play();
       if (playPromise !== undefined) {
         playPromise.catch(e => {
-          showStatus('dlStatus', 'success', '✅ Musik berhasil dimuat. Klik Play pada tombol hijau untuk memutar.');
+          showStatus('dlStatus', 'success', '✅ Musik termuat! Klik tombol Play (Segitiga Hijau) untuk mendengarkan.');
         });
       }
     } else {
-      showStatus('dlStatus', 'error', '❌ Gagal mendapatkan jalur file lagu dari server API.');
+      showStatus('dlStatus', 'error', '❌ Link streaming musik gagal dibuat oleh server.');
     }
   } catch (err) {
-    showStatus('dlStatus', 'error', '❌ Gagal memuat stream data. Web wajib dideploy agar tidak terhalang CORS browser lokal.');
+    showStatus('dlStatus', 'error', '❌ Gagal menghubungkan ke server stream data.');
   }
 }
 
@@ -574,24 +582,27 @@ async function downloadTrack() {
     let finalDownloadUrl = currentTrack.targetAudioUrl;
 
     if (!finalDownloadUrl) {
-      const res = await fetch(`${PLAY_BASE_URL}${encodeURIComponent(currentTrack.computedLink)}`);
+      const reqUrl = CORS_PROXY + encodeURIComponent(`${PLAY_BASE_URL}${encodeURIComponent(currentTrack.computedLink)}`);
+      const res = await fetch(reqUrl);
       const data = await res.json();
 
       if (data && data.songs && data.songs[0] && data.songs[0].url) {
         finalDownloadUrl = data.songs[0].url;
       } else if (data && data.result && data.result.url) {
         finalDownloadUrl = data.result.url;
+      } else if (data && data.url) {
+        finalDownloadUrl = data.url;
       }
     }
 
     if (finalDownloadUrl) {
-      showStatus('dlStatus', 'success', `✅ Tautan siap! <a href="${finalDownloadUrl}" target="_blank" style="color:var(--green); font-weight:bold; text-decoration:underline;">Klik di sini untuk mendownload langsung</a>`);
+      showStatus('dlStatus', 'success', `✅ Tautan siap! <a href="${finalDownloadUrl}" target="_blank" style="color:var(--green); font-weight:bold; text-decoration:underline;">Klik di sini untuk langsung download</a>`);
       window.open(finalDownloadUrl, '_blank');
     } else {
       showStatus('dlStatus', 'error', '❌ Gagal membuat tautan unduhan.');
     }
   } catch (e) {
-    showStatus('dlStatus', 'error', '❌ Terjadi kesalahan jaringan. Silakan deploy website ini agar dapat mengunduh.');
+    showStatus('dlStatus', 'error', '❌ Terjadi kegagalan jaringan saat menghubungi server download.');
   }
 }
 
@@ -605,4 +616,3 @@ function showStatus(id, type, msg) {
 </script>
 </body>
 </html>
-
