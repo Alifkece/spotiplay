@@ -115,19 +115,12 @@ body {
   width: 54px; height: 54px; border-radius: 10px;
   object-fit: cover; flex-shrink: 0;
 }
-.track-img-placeholder {
-  width: 54px; height: 54px; border-radius: 10px;
-  background: rgba(255,255,255,.1);
-  display: flex; align-items: center; justify-content: center;
-  color: #555; flex-shrink: 0;
-}
 .track-info { flex: 1; overflow: hidden; }
 .track-name {
   font-weight: 600; font-size: 14px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .track-artist { color: var(--muted); font-size: 13px; margin-top: 2px; }
-.track-duration { color: #666; font-size: 12px; flex-shrink: 0; }
 .track-actions { display: flex; gap: 8px; flex-shrink: 0; }
 .icon-btn {
   width: 34px; height: 34px; border-radius: 8px;
@@ -135,11 +128,8 @@ body {
   border: 1px solid rgba(255,255,255,.15);
   color: #fff; cursor: pointer; font-size: 13px;
   display: flex; align-items: center; justify-content: center;
-  transition: background .2s;
 }
-.icon-btn:hover { background: rgba(255,255,255,.18); }
 .icon-btn.play-btn { background: var(--green); border-color: var(--green); }
-.icon-btn.play-btn:hover { background: #17a349; }
 
 /* Now Playing */
 #nowPlaying { display: none; }
@@ -150,12 +140,6 @@ body {
   width: 90px; height: 90px; border-radius: 14px;
   object-fit: cover; flex-shrink: 0;
   box-shadow: 0 0 20px rgba(29,185,84,.3);
-  animation: spin-slow 8s linear infinite paused;
-}
-.now-img.playing { animation-play-state: running; }
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 .now-info { flex: 1; min-width: 180px; }
 .now-title { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; }
@@ -164,10 +148,9 @@ body {
 .now-tags { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .tag {
   padding: 3px 10px; border-radius: 20px;
-  font-size: 11px; font-weight: 600; letter-spacing: .5px;
+  font-size: 11px; font-weight: 600;
 }
 .tag-green { background: rgba(29,185,84,.2); color: var(--green); border: 1px solid rgba(29,185,84,.3); }
-.tag-purple { background: rgba(173,74,231,.2); color: #d080ff; border: 1px solid rgba(173,74,231,.3); }
 
 /* Player controls */
 .player-controls { margin-top: 18px; }
@@ -178,37 +161,30 @@ body {
 .progress-bar-fill {
   height: 100%; width: 0%; border-radius: 10px;
   background: linear-gradient(90deg, var(--green), #17a349);
-  pointer-events: none;
 }
 .progress-times { display: flex; justify-content: space-between; font-size: 11px; color: #666; }
 
 .controls-row {
-  display: flex; align-items: center; justify-content: center;
-  gap: 16px; margin-top: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 14px;
 }
 .ctrl-btn {
-  background: none; border: none; color: #aaa;
-  cursor: pointer; font-size: 18px; transition: color .2s;
-  padding: 6px;
+  background: none; border: none; color: #aaa; cursor: pointer; font-size: 18px;
 }
-.ctrl-btn:hover { color: #fff; }
 .ctrl-btn.main {
   width: 46px; height: 46px; border-radius: 50%;
-  background: var(--green); color: #fff; font-size: 18px;
-  display: flex; align-items: center; justify-content: center;
+  background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center;
 }
-.ctrl-btn.main:hover { background: #17a349; }
 
 .volume-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
-.volume-slider { flex: 1; accent-color: var(--green); cursor: pointer; }
+.volume-slider { flex: 1; accent-color: var(--green); }
 
 /* Download */
 .dl-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .dl-btn {
-  flex: 1; min-width: 140px; padding: 10px;
-  border-radius: 12px; font-size: 13px; font-weight: 600;
+  flex: 1; min-width: 140px; padding: 12px;
+  border-radius: 12px; font-size: 14px; font-weight: 600;
   border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  text-decoration: none;
+  text-decoration: none; text-align: center;
 }
 .dl-mp3 { background: linear-gradient(135deg, #1DB954, #17a349); color: #fff; }
 
@@ -218,10 +194,8 @@ body {
   font-size: 13px; margin-top: 12px; display: none;
 }
 .status.loading { display: block; color: var(--secondary); }
-.status.error { display: block; background: rgba(255,0,0,.1); color: #ff6b6b; border: 1px solid rgba(255,0,0,.2); }
+.status.error { display: block; background: rgba(255,0,0,0.15); color: #ff6b6b; border: 1px solid rgba(255,0,0,0.25); text-align: left; }
 .status.success { display: block; background: rgba(29,185,84,.1); color: var(--green); border: 1px solid rgba(29,185,84,.2); }
-
-.hint { font-size: 12px; color: #666; margin-top: 6px; }
 
 .empty-state { text-align: center; color: #555; padding: 30px; font-size: 14px; }
 .empty-state i { font-size: 36px; margin-bottom: 10px; display: block; }
@@ -241,27 +215,21 @@ body {
 </div>
 
 <div class="section">
-  <h2 class="section-title">
-    <i class="fas fa-search" style="color:var(--secondary)"></i> Cari Musik
-  </h2>
-
+  <h2 class="section-title"><i class="fas fa-search" style="color:var(--secondary)"></i> Cari Musik</h2>
   <div class="search-row">
     <input type="text" id="searchQuery" class="input" placeholder="Cari lagu, artis, album..." onkeydown="if(event.key==='Enter')searchTracks()">
     <button class="btn" onclick="searchTracks()"><i class="fas fa-search"></i> Cari</button>
   </div>
-
   <div class="status" id="searchStatus"></div>
   <div class="track-list" id="trackList">
     <div class="empty-state">
-      <i class="fab fa-spotify" style="color:#333"></i>
-      Masukkan judul musik pada kolom pencarian untuk memulai!
+      <i class="fab fa-spotify" style="color:#333"></i> Masukkan judul musik untuk memulai!
     </div>
   </div>
 </div>
 
 <div class="section" id="nowPlaying">
   <h2 class="section-title"><i class="fas fa-music" style="color:var(--green)"></i> Now Playing</h2>
-  
   <div class="now-playing-inner">
     <img id="nowImg" class="now-img" src="" alt="cover">
     <div class="now-info">
@@ -270,7 +238,6 @@ body {
       <div class="now-album" id="nowAlbum">—</div>
       <div class="now-tags">
         <span class="tag tag-green" id="nowPopularity">🔥 Popularity: —</span>
-        <span class="tag tag-purple" id="nowDuration">⏱ 0:00</span>
       </div>
     </div>
   </div>
@@ -284,34 +251,21 @@ body {
       <span id="totalDuration">0:00</span>
     </div>
     <div class="controls-row">
-      <button class="ctrl-btn" title="Rewind 10s" onclick="rewindAudio()"><i class="fas fa-backward"></i></button>
-      <button class="ctrl-btn main" id="mainPlayBtn" title="Play/Pause" onclick="togglePlay()"><i class="fas fa-play"></i></button>
-      <button class="ctrl-btn" title="Forward 10s" onclick="forwardAudio()"><i class="fas fa-forward"></i></button>
+      <button class="ctrl-btn" onclick="rewindAudio()"><i class="fas fa-backward"></i></button>
+      <button class="ctrl-btn main" id="mainPlayBtn" onclick="togglePlay()"><i class="fas fa-play"></i></button>
+      <button class="ctrl-btn" onclick="forwardAudio()"><i class="fas fa-forward"></i></button>
     </div>
     <div class="volume-row">
-      <i class="fas fa-volume-down" style="color:#aaa; font-size:13px;"></i>
       <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="1" oninput="changeVolume(this.value)">
-      <i class="fas fa-volume-up" style="color:#aaa; font-size:13px;"></i>
     </div>
   </div>
 
-  <div class="dl-row" id="dlRow">
+  <div class="dl-row">
     <button class="dl-btn dl-mp3" onclick="downloadTrack()">
-      <i class="fas fa-music"></i> Download MP3
+      <i class="fas fa-download"></i> Dapatkan Link Download MP3
     </button>
   </div>
-  <div class="hint" style="margin-top:8px">⚠️ Unduhan & pemutaran musik dialirkan langsung melalui basis server API KyzzNeKoo berkualitas penuh.</div>
   <div class="status" id="dlStatus"></div>
-</div>
-
-<div class="section">
-  <h2 class="section-title"><i class="fas fa-info-circle" style="color:var(--secondary)"></i> Cara Pakai</h2>
-  <ul style="margin-left:20px;line-height:2">
-    <li>Cari musik berdasarkan judul, artis, maupun nama album.</li>
-    <li>Klik pada baris lagu untuk memuat info lagu & mengaktifkan kontrol audio.</li>
-    <li>Gunakan pemutar audio terintegrasi untuk mendengarkan lagu secara penuh.</li>
-    <li>Klik tombol Download untuk mengunduh musik instan secara langsung.</li>
-  </ul>
 </div>
 
 </div>
@@ -320,7 +274,6 @@ body {
 const PLAY_BASE_URL = "https://kyzznekoo.zone.id/api/play/spotify?url=";
 const SEARCH_BASE_URL = "https://kyzznekoo.zone.id/api/search/spotify?q=";
 
-// Menggunakan multi-proxy untuk jaminan bypass CORS di GitHub Pages
 const PROXIES = [
   "https://api.allorigins.win/raw?url=",
   "https://corsproxy.io/?url="
@@ -330,297 +283,148 @@ let currentTrack = null;
 const audioPlayer = new Audio();
 audioPlayer.crossOrigin = "anonymous";
 
-// Fetch dengan proteksi fallback proxy
-async function fetchWithProxyFallback(originalUrl) {
-  let lastError = null;
-  for (let proxy of PROXIES) {
+async function fetchWithProxy(url) {
+  let lastErr = null;
+  for (let p of PROXIES) {
     try {
-      const targetUrl = proxy + encodeURIComponent(originalUrl);
-      const res = await fetch(targetUrl);
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch (err) {
-      lastError = err;
-    }
+      const res = await fetch(p + encodeURIComponent(url));
+      if (res.ok) return await res.json();
+    } catch (e) { lastErr = e; }
   }
-  throw lastError || new Error("Semua proxy gagal");
+  // Fallback direct request jika proxy bermasalah
+  const direct = await fetch(url);
+  return await direct.json();
 }
 
-// =====================
-// AUDIO PLAYER ENGINE
-// =====================
 audioPlayer.addEventListener('timeupdate', () => {
   if (!audioPlayer.duration) return;
-  const fillPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-  document.getElementById('progressBarFill').style.width = fillPercent + '%';
+  document.getElementById('progressBarFill').style.width = (audioPlayer.currentTime / audioPlayer.duration) * 100 + '%';
   document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
 });
-
 audioPlayer.addEventListener('loadedmetadata', () => {
   document.getElementById('totalDuration').textContent = formatTime(audioPlayer.duration);
-  document.getElementById('nowDuration').textContent = '⏱ ' + formatTime(audioPlayer.duration);
 });
-
-audioPlayer.addEventListener('play', () => {
-  document.getElementById('mainPlayBtn').innerHTML = '<i class="fas fa-pause"></i>';
-  document.getElementById('nowImg').classList.add('playing');
-});
-
-audioPlayer.addEventListener('pause', () => {
-  document.getElementById('mainPlayBtn').innerHTML = '<i class="fas fa-play"></i>';
-  document.getElementById('nowImg').classList.remove('playing');
-});
-
-audioPlayer.addEventListener('ended', () => {
-  document.getElementById('mainPlayBtn').innerHTML = '<i class="fas fa-play"></i>';
-  document.getElementById('nowImg').classList.remove('playing');
-  document.getElementById('progressBarFill').style.width = '0%';
-  document.getElementById('currentTime').textContent = '0:00';
-});
-
-audioPlayer.addEventListener('error', (e) => {
-  console.error("Audio error:", e);
-  showStatus('dlStatus', 'error', '⚠️ Streaming langsung tidak didukung jenis file server ini. Silakan klik tombol "Download MP3" di bawah untuk mengunduh lagunya secara langsung.');
+audioPlayer.addEventListener('play', () => { document.getElementById('mainPlayBtn').innerHTML = '<i class="fas fa-pause"></i>'; });
+audioPlayer.addEventListener('pause', () => { document.getElementById('mainPlayBtn').innerHTML = '<i class="fas fa-play"></i>'; });
+audioPlayer.addEventListener('error', () => {
+  showStatus('dlStatus', 'error', '⚠️ Browser memblokir streaming langsung akibat sistem mixed-content HTTPS GitHub. Jangan khawatir! Silakan ketuk tombol <b>"Dapatkan Link Download MP3"</b> di atas untuk mengunduh musiknya secara langsung.');
 });
 
 function togglePlay() {
-  if (!audioPlayer.src || audioPlayer.src === window.location.href) {
-    showStatus('dlStatus', 'error', '❌ Pilih lagu dari daftar pencarian terlebih dahulu!');
-    return;
-  }
-  if (audioPlayer.paused) {
-    audioPlayer.play().catch(e => {
-      showStatus('dlStatus', 'error', '❌ Playback error. Silakan langsung unduh musik menggunakan tombol hijau.');
-    });
-  } else {
-    audioPlayer.pause();
-  }
+  if (!audioPlayer.src || audioPlayer.src === window.location.href) return;
+  if (audioPlayer.paused) audioPlayer.play().catch(()=>{});
+  else audioPlayer.pause();
 }
-
+ Zar
 function seekAudio(e) {
   if (!audioPlayer.duration) return;
   const rect = document.getElementById('progressBarWrap').getBoundingClientRect();
-  const clickX = e.clientX - rect.left;
-  const widthPercent = clickX / rect.width;
-  audioPlayer.currentTime = widthPercent * audioPlayer.duration;
+  audioPlayer.currentTime = ((e.clientX - rect.left) / rect.width) * audioPlayer.duration;
+}
+function changeVolume(v) { audioPlayer.volume = v; }
+function rewindAudio() { audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 10); }
+function forwardAudio() { audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + 10); }
+function formatTime(s) {
+  if(isNaN(s)) return "0:00";
+  const m = Math.floor(s/60); const sec = Math.floor(s%60).toString().padStart(2,'0');
+  return `${m}:${sec}`;
 }
 
-function changeVolume(val) {
-  audioPlayer.volume = val;
-}
-
-function rewindAudio() {
-  audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 10);
-}
-
-function forwardAudio() {
-  audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + 10);
-}
-
-function formatTime(secs) {
-  if (isNaN(secs) || !isFinite(secs)) return "0:00";
-  const m = Math.floor(secs / 60);
-  const s = Math.floor(secs % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
-}
-
-// =====================
-// SEARCH CORE SYSTEM
-// =====================
 async function searchTracks() {
   const q = document.getElementById('searchQuery').value.trim();
   if (!q) return;
-
-  showStatus('searchStatus', 'loading', '<i class="fas fa-spinner fa-spin"></i> Mencari lagu...');
-  document.getElementById('trackList').innerHTML = '';
-
+  showStatus('searchStatus', 'loading', 'Mencari lagu...');
   try {
-    const data = await fetchWithProxyFallback(`${SEARCH_BASE_URL}${encodeURIComponent(q)}`);
+    const data = await fetchWithProxy(`${SEARCH_BASE_URL}${encodeURIComponent(q)}`);
     const items = data.songs || data.result || data.data || [];
-
-    if (items.length === 0) {
-      showStatus('searchStatus', 'error', '😔 Lagu tidak ditemukan.');
-      return;
-    }
-
+    if (!items.length) { showStatus('searchStatus', 'error', 'Lagu tidak ditemukan.'); return; }
+    
     showStatus('searchStatus', '', '');
     document.getElementById('searchStatus').style.display = 'none';
-
-    const list = document.getElementById('trackList');
-    list.innerHTML = '';
+    const list = document.getElementById('trackList'); list.innerHTML = '';
 
     items.forEach((track, index) => {
-      // Perbaikan pembacaan key image & thumbnail response API Kyzznekoo
-      let img = track.thumbnail || track.image || track.cover || (track.album && track.album.cover) || '';
+      let img = track.thumbnail || track.image || track.cover || (track.album && track.album.cover) || 'https://placehold.co/150/222/fff?text=Music';
+      if (img.startsWith('http://')) img = img.replace('http://', 'https://');
       
-      // Mengatasi URL gambar spotify yang tidak menggunakan HTTPS agar tidak diblokir
-      if (img && img.startsWith('http://')) {
-        img = img.replace('http://', 'https://');
-      }
-
-      const artist = track.artist || track.author || (track.artists && track.artists[0]?.name) || 'Unknown Artist';
+      const artist = track.artist || track.author || 'Unknown Artist';
       const title = track.title || track.name || 'Unknown Title';
-      const albumName = track.album?.name || track.album || 'Single';
-      const trackLink = track.url || track.link || track.spotifyUrl || '';
       
       const card = document.createElement('div');
       card.className = 'track-card';
-      card.dataset.id = index; 
-      
+      card.dataset.id = index;
       card.innerHTML = `
-        ${img 
-          ? `<img class="track-img" src="${img}" alt="cover" onerror="this.src='https://placehold.co/150/222/fff?text=Music'">`
-          : `<div class="track-img-placeholder"><i class="fas fa-music"></i></div>`
-        }
+        <img class="track-img" src="${img}" alt="cover">
         <div class="track-info">
           <div class="track-name">${title}</div>
-          <div class="track-artist">${artist} · ${albumName}</div>
+          <div class="track-artist">${artist}</div>
         </div>
-        <div class="track-duration">—:—</div>
-        <div class="track-actions">
-          <button class="icon-btn play-btn" onclick="playTrack(event, '${index}')" title="Play Full Track">
-            <i class="fas fa-play"></i>
-          </button>
-        </div>
+        <div class="track-actions"><button class="icon-btn play-btn"><i class="fas fa-play"></i></button></div>
       `;
       
-      track.computedImg = img;
-      track.computedArtist = artist;
-      track.computedTitle = title;
-      track.computedAlbum = albumName;
-      track.computedLink = trackLink;
-      
-      card.trackData = track;
-      card.onclick = (e) => {
-        if (e.target.closest('.icon-btn')) return;
-        loadTrackInfo(card.trackData, index);
-      };
-      
+      track.cImg = img; track.cArtist = artist; track.cTitle = title;
+      track.cLink = track.url || track.link || '';
+      card.onclick = () => loadTrack(track, index);
       list.appendChild(card);
     });
-  } catch (e) {
-    showStatus('searchStatus', 'error', '❌ Gagal melakukan pencarian karena gangguan server API atau CORS.');
-  }
+  } catch(e) { showStatus('searchStatus', 'error', 'Gagal memuat API Search.'); }
 }
 
-// =====================
-// LOAD & STREAMING FETCHER
-// =====================
-async function loadTrackInfo(track, elementId) {
+async function loadTrack(track, id) {
   currentTrack = track;
-
   document.querySelectorAll('.track-card').forEach(c => c.classList.remove('active'));
-  const activeCard = document.querySelector(`[data-id="${elementId}"]`);
-  if (activeCard) activeCard.classList.add('active');
+  const active = document.querySelector(`[data-id="${id}"]`);
+  if (active) active.classList.add('active');
 
-  // Mengubah cover album Now Playing secara instan tanpa pecah
-  document.getElementById('nowImg').src = track.computedImg || 'https://placehold.co/150/222/fff?text=Music';
-  document.getElementById('nowTitle').textContent = track.computedTitle;
-  document.getElementById('nowArtist').textContent = track.computedArtist;
-  document.getElementById('nowAlbum').textContent = '📀 ' + track.computedAlbum;
+  document.getElementById('nowImg').src = track.cImg;
+  document.getElementById('nowTitle').textContent = track.cTitle;
+  document.getElementById('nowArtist').textContent = track.cArtist;
+  document.getElementById('nowAlbum').textContent = track.album?.name || 'Single Track';
   document.getElementById('nowPopularity').textContent = '🔥 Popularity: ' + (track.popularity || 'N/A') + '/100';
-
   document.getElementById('nowPlaying').style.display = 'block';
-  document.getElementById('dlStatus').style.display = 'none';
-
-  // Reset Audio
-  audioPlayer.pause();
-  audioPlayer.removeAttribute('src');
-  audioPlayer.load();
-  document.getElementById('progressBarFill').style.width = '0%';
-  document.getElementById('currentTime').textContent = '0:00';
-  document.getElementById('totalDuration').textContent = 'Loading...';
-
-  showStatus('dlStatus', 'loading', '<i class="fas fa-spinner fa-spin"></i> Menghubungkan ke API Stream...');
+  
+  audioPlayer.pause(); audioPlayer.src = '';
+  showStatus('dlStatus', 'loading', 'Menghubungkan ke server stream data...');
 
   try {
-    const targetUrl = track.computedLink;
-    const dlData = await fetchWithProxyFallback(`${PLAY_BASE_URL}${encodeURIComponent(targetUrl)}`);
+    const resData = await fetchWithProxy(`${PLAY_BASE_URL}${encodeURIComponent(track.cLink)}`);
+    let audioUrl = resData.url || (resData.songs && resData.songs[0]?.url) || (resData.result && resData.result.url);
     
-    let audioUrl = '';
-    if (dlData && dlData.songs && dlData.songs[0] && dlData.songs[0].url) {
-      audioUrl = dlData.songs[0].url;
-    } else if (dlData && dlData.result && dlData.result.url) {
-      audioUrl = dlData.result.url;
-    } else if (dlData && dlData.url) {
-      audioUrl = dlData.url;
-    }
-
     if (audioUrl) {
-      currentTrack.targetAudioUrl = audioUrl;
+      if (audioUrl.startsWith('http://')) audioUrl = audioUrl.replace('http://', 'https://');
+      currentTrack.audioUrl = audioUrl;
       audioPlayer.src = audioUrl;
       audioPlayer.load();
-      showStatus('dlStatus', '', '');
-      document.getElementById('dlStatus').style.display = 'none';
-      
-      audioPlayer.play().catch(e => {
-        showStatus('dlStatus', 'success', '✅ Musik termuat! Silakan ketuk tombol Play Hijau untuk mendengarkan.');
-      });
+      showStatus('dlStatus', 'success', '✅ Siap diputar! Klik tombol hijau di atas.');
+      audioPlayer.play().catch(()=>{});
     } else {
-      showStatus('dlStatus', 'error', '❌ Link streaming musik gagal dibuat oleh server.');
+      showStatus('dlStatus', 'error', '⚠️ Server gagal membuat streaming langsung. Silakan langsung klik tombol "Dapatkan Link Download MP3" di bawah.');
     }
-  } catch (err) {
-    showStatus('dlStatus', 'error', '❌ Gagal menghubungkan ke server stream data.');
+  } catch(e) {
+    showStatus('dlStatus', 'error', '❌ Gagal memuat data stream dari server.');
   }
 }
 
-function playTrack(e, id) {
-  e.stopPropagation();
-  const card = document.querySelector(`[data-id="${id}"]`);
-  if (card) {
-    if (currentTrack && card.classList.contains('active')) {
-      togglePlay();
-    } else {
-      card.click();
-    }
-  }
-  document.getElementById('nowPlaying').scrollIntoView({ behavior: 'smooth' });
-}
-
-// =====================
-// DOWNLOAD EXECUTOR
-// =====================
 async function downloadTrack() {
-  if (!currentTrack) {
-    showStatus('dlStatus', 'error', '❌ Silakan pilih lagu terlebih dahulu!');
-    return;
-  }
-
-  showStatus('dlStatus', 'loading', `<i class="fas fa-spinner fa-spin"></i> Menyiapkan tautan unduhan...`);
-
+  if (!currentTrack) return;
+  showStatus('dlStatus', 'loading', 'Menyiapkan link unduhan...');
   try {
-    let finalDownloadUrl = currentTrack.targetAudioUrl;
-
-    if (!finalDownloadUrl) {
-      const data = await fetchWithProxyFallback(`${PLAY_BASE_URL}${encodeURIComponent(currentTrack.computedLink)}`);
-
-      if (data && data.songs && data.songs[0] && data.songs[0].url) {
-        finalDownloadUrl = data.songs[0].url;
-      } else if (data && data.result && data.result.url) {
-        finalDownloadUrl = data.result.url;
-      } else if (data && data.url) {
-        finalDownloadUrl = data.url;
-      }
+    let url = currentTrack.audioUrl;
+    if(!url) {
+      const resData = await fetchWithProxy(`${PLAY_BASE_URL}${encodeURIComponent(currentTrack.cLink)}`);
+      url = resData.url || (resData.songs && resData.songs[0]?.url) || (resData.result && resData.result.url);
     }
-
-    if (finalDownloadUrl) {
-      showStatus('dlStatus', 'success', `✅ Tautan siap! <a href="${finalDownloadUrl}" target="_blank" style="color:var(--green); font-weight:bold; text-decoration:underline;">Klik di sini untuk langsung download</a>`);
-      window.open(finalDownloadUrl, '_blank');
-    } else {
-      showStatus('dlStatus', 'error', '❌ Gagal membuat tautan unduhan.');
-    }
-  } catch (e) {
-    showStatus('dlStatus', 'error', '❌ Terjadi kegagalan jaringan saat menghubungi server download.');
-  }
+    if(url) {
+      showStatus('dlStatus', 'success', `🎉 Link Siap! <a href="${url}" target="_blank" style="color:#1DB954; font-weight:bold; text-decoration:underline;">Klik di Sini untuk Download MP3</a>`);
+      window.open(url, '_blank');
+    } else { showStatus('dlStatus', 'error', 'Gagal mendapatkan link unduhan.'); }
+  } catch(e) { showStatus('dlStatus', 'error', 'Terjadi kesalahan jaringan.'); }
 }
 
 function showStatus(id, type, msg) {
   const el = document.getElementById(id);
-  el.className = 'status ' + type;
-  el.innerHTML = msg;
-  if (type) el.style.display = 'block';
-  else el.style.display = 'none';
+  el.className = 'status ' + type; el.innerHTML = msg;
+  el.style.display = type ? 'block' : 'none';
 }
 </script>
 </body>
