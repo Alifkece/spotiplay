@@ -185,9 +185,8 @@ body {
   border-radius: 10px; cursor: pointer; position: relative; margin-bottom: 6px;
 }
 .progress-bar-fill {
-  height: 100%; border-radius: 10px;
+  height: 100%; width: 0%; border-radius: 10px;
   background: linear-gradient(90deg, var(--green), #17a349);
-  transition: width .5s linear;
   pointer-events: none;
 }
 .progress-times { display: flex; justify-content: space-between; font-size: 11px; color: #666; }
@@ -254,47 +253,18 @@ body {
 <body>
 <div class="container">
 
-<!-- PROFILE -->
 <div class="profile-wrapper">
   <video src="https://raw.githubusercontent.com/Alifkece/media/main/uploads/1780631439477_download.mp4" autoplay loop muted playsinline></video>
 </div>
 
-<!-- HEADER -->
 <div class="header">
   <h1 class="title">Spoti<span>Play</span></h1>
-  <p class="subtitle">Powered By Aliftzycrt🍓 &nbsp;|&nbsp; Search · Play · Download</p>
+  <p class="subtitle">Powered By Aliftzycrt🍓  |  Search · Play · Download</p>
 </div>
 
-<!-- AUTH SECTION -->
-<div class="section" id="authSection">
-  <h2 class="section-title"><i class="fab fa-spotify" style="color:var(--green)"></i> Konfigurasi Spotify API</h2>
-  
-  <div class="input-row">
-    <div class="input-group">
-      <label class="label"><i class="fas fa-key"></i> Client ID</label>
-      <input type="text" id="clientId" class="input" placeholder="Masukkan Client ID kamu...">
-    </div>
-    <div class="input-group">
-      <label class="label"><i class="fas fa-lock"></i> Client Secret</label>
-      <input type="password" id="clientSecret" class="input" placeholder="Masukkan Client Secret kamu...">
-    </div>
-  </div>
-
-  <div class="hint">💡 Dapatkan di <a href="https://developer.spotify.com/dashboard" target="_blank" style="color:var(--green)">developer.spotify.com/dashboard</a></div>
-
-  <button class="btn btn-full" onclick="authenticate()">
-    <i class="fas fa-plug"></i> Connect ke Spotify
-  </button>
-  <div class="status" id="authStatus"></div>
-</div>
-
-<!-- SEARCH SECTION -->
 <div class="section">
   <h2 class="section-title">
     <i class="fas fa-search" style="color:var(--secondary)"></i> Cari Musik
-    <span id="authBadge" class="badge-auth not" style="margin-left:auto;font-size:11px">
-      <i class="fas fa-circle"></i> Belum Konek
-    </span>
   </h2>
 
   <div class="search-row">
@@ -306,12 +276,11 @@ body {
   <div class="track-list" id="trackList">
     <div class="empty-state">
       <i class="fab fa-spotify" style="color:#333"></i>
-      Hubungkan API dulu, lalu cari lagu favoritmu!
+      Masukkan judul musik pada kolom pencarian untuk memulai!
     </div>
   </div>
 </div>
 
-<!-- NOW PLAYING -->
 <div class="section" id="nowPlaying">
   <h2 class="section-title"><i class="fas fa-music" style="color:var(--green)"></i> Now Playing</h2>
   
@@ -322,110 +291,157 @@ body {
       <div class="now-artist" id="nowArtist">—</div>
       <div class="now-album" id="nowAlbum">—</div>
       <div class="now-tags">
-        <span class="tag tag-green" id="nowPopularity"></span>
-        <span class="tag tag-purple" id="nowDuration"></span>
+        <span class="tag tag-green" id="nowPopularity" style="display:none;"></span>
+        <span class="tag tag-purple" id="nowDuration">⏱ 0:00</span>
       </div>
     </div>
   </div>
 
-  <!-- Spotify Embed Player -->
+  <div class="player-controls">
+    <div class="progress-bar-wrap" id="progressBarWrap" onclick="seekAudio(event)">
+      <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+    <div class="progress-times">
+      <span id="currentTime">0:00</span>
+      <span id="totalDuration">0:00</span>
+    </div>
+    <div class="controls-row">
+      <button class="ctrl-btn" title="Rewind 10s" onclick="rewindAudio()"><i class="fas fa-backward"></i></button>
+      <button class="ctrl-btn main" id="mainPlayBtn" title="Play/Pause" onclick="togglePlay()"><i class="fas fa-play"></i></button>
+      <button class="ctrl-btn" title="Forward 10s" onclick="forwardAudio()"><i class="fas fa-forward"></i></button>
+    </div>
+    <div class="volume-row">
+      <i class="fas fa-volume-down" style="color:#aaa; font-size:13px;"></i>
+      <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="1" oninput="changeVolume(this.value)">
+      <i class="fas fa-volume-up" style="color:#aaa; font-size:13px;"></i>
+    </div>
+  </div>
+
   <div class="spotify-embed" id="spotifyEmbed">
     <iframe id="spotifyIframe" src="" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
   </div>
 
-  <!-- Download buttons -->
   <div class="dl-row" id="dlRow">
-    <button class="dl-btn dl-mp3" onclick="downloadTrack('mp3')">
+    <button class="dl-btn dl-mp3" onclick="downloadTrack()">
       <i class="fas fa-music"></i> Download MP3
     </button>
-    <button class="dl-btn dl-mp4" onclick="downloadTrack('mp4')">
+    <button class="dl-btn dl-mp4" style="display: none;" disabled>
       <i class="fas fa-video"></i> Download MP4
     </button>
   </div>
-  <div class="hint" style="margin-top:8px">⚠️ Download menggunakan layanan pihak ketiga (yt-dlp API). Pastikan lagu tersedia di YouTube.</div>
+  <div class="hint" style="margin-top:8px">⚠️ Unduhan langsung dialirkan melalui basis server API KyzzNeKoo berkualitas penuh.</div>
   <div class="status" id="dlStatus"></div>
 </div>
 
-<!-- INFO -->
 <div class="section">
   <h2 class="section-title"><i class="fas fa-info-circle" style="color:var(--secondary)"></i> Cara Pakai</h2>
   <ul style="margin-left:20px;line-height:2">
-    <li>Masukkan <b>Client ID</b> & <b>Client Secret</b> dari Spotify Developer</li>
-    <li>Klik <b>Connect ke Spotify</b> untuk autentikasi</li>
-    <li>Cari lagu di kolom pencarian</li>
-    <li>Klik lagu untuk melihat info & memutar preview</li>
-    <li>Klik <b>Download MP3/MP4</b> untuk mengunduh</li>
+    <li>Cari musik berdasarkan judul, artis, maupun nama album</li>
+    <li>Klik pada baris lagu untuk memuat info lagu & mengaktifkan kontrol audio</li>
+    <li>Gunakan pemutar audio HTML5 terintegrasi untuk mendengarkan lagu secara penuh</li>
+    <li>Klik tombol <b>Download MP3</b> untuk mengunduh lagu berkualitas premium</li>
   </ul>
   <div style="margin-top:15px;background:rgba(173,74,231,.1);border-left:4px solid #fff900;padding:15px;border-radius:8px">
     <i class="fas fa-lightbulb"></i>
-    <b> Note:</b> Spotify hanya menyediakan preview 30 detik untuk akun gratis. Untuk full track, gunakan fitur Download.
+    <b> Note:</b> Pemutar media sekarang memutar lagu penuh berdurasi total secara real-time langsung melalui stream audio API KyzzNeKoo.
   </div>
 </div>
 
-</div><!-- end container -->
+</div>
 
 <script>
-// =====================
-// CONFIG — ISI DI SINI
-// =====================
-let ACCESS_TOKEN = '';
+// Langsung disematkan di file HTML/JS sesuai instruksi personal use kamu
+const BASE_URL = "https://kyzznekoo.zone.id/api/play/spotify?url=";
+
 let currentTrack = null;
+const audioPlayer = new Audio();
+audioPlayer.crossOrigin = "anonymous";
 
 // =====================
-// AUTH
+// AUDIO PLAYER ENGINE
 // =====================
-async function authenticate() {
-  const clientId = document.getElementById('clientId').value.trim();
-  const clientSecret = document.getElementById('clientSecret').value.trim();
-  
-  if (!clientId || !clientSecret) {
-    showStatus('authStatus', 'error', '❌ Client ID dan Client Secret wajib diisi!');
+audioPlayer.addEventListener('timeupdate', () => {
+  if (!audioPlayer.duration) return;
+  const fillPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+  document.getElementById('progressBarFill').style.width = fillPercent + '%';
+  document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
+});
+
+audioPlayer.addEventListener('loadedmetadata', () => {
+  document.getElementById('totalDuration').textContent = formatTime(audioPlayer.duration);
+  document.getElementById('nowDuration').textContent = '⏱ ' + formatTime(audioPlayer.duration);
+});
+
+audioPlayer.addEventListener('play', () => {
+  document.getElementById('mainPlayBtn').innerHTML = '<i class="fas fa-pause"></i>';
+  document.getElementById('nowImg').classList.add('playing');
+});
+
+audioPlayer.addEventListener('pause', () => {
+  document.getElementById('mainPlayBtn').innerHTML = '<i class="fas fa-play"></i>';
+  document.getElementById('nowImg').classList.remove('playing');
+});
+
+audioPlayer.addEventListener('ended', () => {
+  document.getElementById('mainPlayBtn').innerHTML = '<i class="fas fa-play"></i>';
+  document.getElementById('nowImg').classList.remove('playing');
+  document.getElementById('progressBarFill').style.width = '0%';
+  document.getElementById('currentTime').textContent = '0:00';
+});
+
+audioPlayer.addEventListener('error', (e) => {
+  console.error("Audio error caught:", e);
+  showStatus('dlStatus', 'error', '⚠️ Stream gagal diakses lokal (CORS). Silakan deploy file HTML ini ke Vercel/Netlify/GitHub Pages agar pemutar berfungsi 100% lancar tanpa blokir browser.');
+});
+
+function togglePlay() {
+  if (!audioPlayer.src || audioPlayer.src === window.location.href) {
+    showStatus('dlStatus', 'error', '❌ Pilih lagu dari daftar pencarian terlebih dahulu!');
     return;
   }
-
-  showStatus('authStatus', 'loading', '<i class="fas fa-spinner fa-spin"></i> Menghubungkan ke Spotify...');
-
-  try {
-    const res = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
-      },
-      body: 'grant_type=client_credentials'
-    });
-
-    const data = await res.json();
-
-    if (data.access_token) {
-      ACCESS_TOKEN = data.access_token;
-      showStatus('authStatus', 'success', '✅ Berhasil konek ke Spotify!');
-      document.getElementById('authBadge').innerHTML = '<i class="fas fa-circle"></i> Terhubung';
-      document.getElementById('authBadge').className = 'badge-auth';
-      
-      // Auto expire token setelah 1 jam
-      setTimeout(() => {
-        ACCESS_TOKEN = '';
-        document.getElementById('authBadge').innerHTML = '<i class="fas fa-circle"></i> Token Expired';
-        document.getElementById('authBadge').className = 'badge-auth not';
-      }, 3500000);
-    } else {
-      showStatus('authStatus', 'error', '❌ Gagal: ' + (data.error_description || 'Client ID/Secret salah'));
+  if (audioPlayer.paused) {
+    const playPromise = audioPlayer.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        showStatus('dlStatus', 'error', '❌ Playback ditolak. Silakan deploy website ini ke hosting gratis atau gunakan tombol download.');
+      });
     }
-  } catch (e) {
-    showStatus('authStatus', 'error', '❌ Gagal konek. Cek koneksi internet kamu!');
+  } else {
+    audioPlayer.pause();
   }
 }
 
+function seekAudio(e) {
+  if (!audioPlayer.duration) return;
+  const rect = document.getElementById('progressBarWrap').getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const widthPercent = clickX / rect.width;
+  audioPlayer.currentTime = widthPercent * audioPlayer.duration;
+}
+
+function changeVolume(val) {
+  audioPlayer.volume = val;
+}
+
+function rewindAudio() {
+  audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 10);
+}
+
+function forwardAudio() {
+  audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + 10);
+}
+
+function formatTime(secs) {
+  if (isNaN(secs) || !isFinite(secs)) return "0:00";
+  const m = Math.floor(secs / 60);
+  const s = Math.floor(secs % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
 // =====================
-// SEARCH
+// SEARCH CORE SYSTEM
 // =====================
 async function searchTracks() {
-  if (!ACCESS_TOKEN) {
-    showStatus('searchStatus', 'error', '❌ Konek ke Spotify dulu!');
-    return;
-  }
-
   const q = document.getElementById('searchQuery').value.trim();
   if (!q) return;
 
@@ -433,13 +449,15 @@ async function searchTracks() {
   document.getElementById('trackList').innerHTML = '';
 
   try {
-    const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track&limit=10`, {
-      headers: { 'Authorization': 'Bearer ' + ACCESS_TOKEN }
-    });
+    // Memakai endpoint pencarian KyzzNeKoo Spotify Search
+    const res = await fetch(`https://kyzznekoo.zone.id/api/search/spotify?q=${encodeURIComponent(q)}`);
     const data = await res.json();
 
-    if (!data.tracks || data.tracks.items.length === 0) {
-      showStatus('searchStatus', 'error', '😔 Lagu tidak ditemukan');
+    // Mapping fleksibel data response
+    const items = data.songs || data.result || data.data || [];
+
+    if (items.length === 0) {
+      showStatus('searchStatus', 'error', '😔 Lagu tidak ditemukan.');
       return;
     }
 
@@ -449,138 +467,164 @@ async function searchTracks() {
     const list = document.getElementById('trackList');
     list.innerHTML = '';
 
-    data.tracks.items.forEach(track => {
-      const img = track.album.images[0]?.url || '';
-      const artists = track.artists.map(a => a.name).join(', ');
-      const dur = msToTime(track.duration_ms);
-
+    items.forEach((track, index) => {
+      // Perbaikan pembacaan key thumbnail agar gambar cover selalu muncul stabil
+      const img = track.thumbnail || track.image || track.cover || (track.album && track.album.cover) || '';
+      const artist = track.artist || track.author || (track.artists && track.artists[0]?.name) || 'Unknown Artist';
+      const title = track.title || track.name || 'Unknown Title';
+      const albumName = track.album?.name || track.album || 'Single';
+      const trackLink = track.url || track.link || track.spotifyUrl || '';
+      
       const card = document.createElement('div');
       card.className = 'track-card';
-      card.dataset.id = track.id;
+      card.dataset.id = index; 
+      
       card.innerHTML = `
         ${img 
-          ? `<img class="track-img" src="${img}" alt="cover" loading="lazy">`
+          ? `<img class="track-img" src="${img}" alt="cover" onerror="this.src='https://placehold.co/150/222/fff?text=Music'">`
           : `<div class="track-img-placeholder"><i class="fas fa-music"></i></div>`
         }
         <div class="track-info">
-          <div class="track-name">${track.name}</div>
-          <div class="track-artist">${artists} · ${track.album.name}</div>
+          <div class="track-name">${title}</div>
+          <div class="track-artist">${artist} · ${albumName}</div>
         </div>
-        <div class="track-duration">${dur}</div>
+        <div class="track-duration">—:—</div>
         <div class="track-actions">
-          <button class="icon-btn play-btn" onclick="playTrack(event, '${track.id}')" title="Play Preview">
+          <button class="icon-btn play-btn" onclick="playTrack(event, '${index}')" title="Play Full Track">
             <i class="fas fa-play"></i>
           </button>
         </div>
       `;
+      
+      track.computedImg = img;
+      track.computedArtist = artist;
+      track.computedTitle = title;
+      track.computedAlbum = albumName;
+      track.computedLink = trackLink;
+      
+      card.trackData = track;
       card.onclick = (e) => {
         if (e.target.closest('.icon-btn')) return;
-        loadTrackInfo(track);
+        loadTrackInfo(card.trackData, index);
       };
+      
       list.appendChild(card);
     });
   } catch (e) {
-    showStatus('searchStatus', 'error', '❌ Gagal search. Coba lagi!');
+    showStatus('searchStatus', 'error', '❌ Gagal melakukan pencarian karena batasan local CORS. Silakan deploy terlebih dahulu.');
   }
 }
 
 // =====================
-// LOAD TRACK INFO
+// LOAD & STREAMING FETCHER
 // =====================
-function loadTrackInfo(track) {
+async function loadTrackInfo(track, elementId) {
   currentTrack = track;
 
-  // Highlight active
   document.querySelectorAll('.track-card').forEach(c => c.classList.remove('active'));
-  document.querySelector(`[data-id="${track.id}"]`)?.classList.add('active');
+  const activeCard = document.querySelector(`[data-id="${elementId}"]`);
+  if (activeCard) activeCard.classList.add('active');
 
-  const img = track.album.images[0]?.url || '';
-  const artists = track.artists.map(a => a.name).join(', ');
-  const dur = msToTime(track.duration_ms);
-
-  document.getElementById('nowImg').src = img;
-  document.getElementById('nowTitle').textContent = track.name;
-  document.getElementById('nowArtist').textContent = artists;
-  document.getElementById('nowAlbum').textContent = '📀 ' + track.album.name + ' (' + track.album.release_date?.slice(0,4) + ')';
-  document.getElementById('nowPopularity').textContent = '🔥 Popularity: ' + track.popularity + '/100';
-  document.getElementById('nowDuration').textContent = '⏱ ' + dur;
+  document.getElementById('nowImg').src = track.computedImg || 'https://placehold.co/150/222/fff?text=Music';
+  document.getElementById('nowTitle').textContent = track.computedTitle;
+  document.getElementById('nowArtist').textContent = track.computedArtist;
+  document.getElementById('nowAlbum').textContent = '📀 ' + track.computedAlbum;
 
   document.getElementById('nowPlaying').style.display = 'block';
   document.getElementById('dlStatus').style.display = 'none';
+  document.getElementById('spotifyEmbed').style.display = 'none';
 
-  // Spotify embed
-  document.getElementById('spotifyIframe').src = `https://open.spotify.com/embed/track/${track.id}?utm_source=generator&theme=0`;
-  document.getElementById('spotifyEmbed').style.display = 'block';
+  // Reset audio engine
+  audioPlayer.pause();
+  audioPlayer.removeAttribute('src');
+  audioPlayer.load();
+  document.getElementById('progressBarFill').style.width = '0%';
+  document.getElementById('currentTime').textContent = '0:00';
+  document.getElementById('totalDuration').textContent = 'Loading...';
+
+  showStatus('dlStatus', 'loading', '<i class="fas fa-spinner fa-spin"></i> Menghubungkan ke API KyzzNeKoo...');
+
+  try {
+    // Langsung hit ke core endpoint play download menggunakan track link spotify
+    const targetUrl = track.computedLink;
+    const res = await fetch(`${BASE_URL}${encodeURIComponent(targetUrl)}`);
+    const dlData = await res.json();
+    
+    let audioUrl = '';
+    if (dlData && dlData.songs && dlData.songs[0] && dlData.songs[0].url) {
+      audioUrl = dlData.songs[0].url;
+    } else if (dlData && dlData.result && dlData.result.url) {
+      audioUrl = dlData.result.url;
+    }
+
+    if (audioUrl) {
+      currentTrack.targetAudioUrl = audioUrl;
+      audioPlayer.src = audioUrl;
+      audioPlayer.load();
+      showStatus('dlStatus', '', '');
+      document.getElementById('dlStatus').style.display = 'none';
+      
+      const playPromise = audioPlayer.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          showStatus('dlStatus', 'success', '✅ Musik termuat. Klik tombol Play di panel kontrol tengah untuk memutar.');
+        });
+      }
+    } else {
+      showStatus('dlStatus', 'error', '❌ API KyzzNeKoo tidak mengembalikan link streaming audio untuk lagu ini.');
+    }
+  } catch (err) {
+    showStatus('dlStatus', 'error', '❌ Gagal memuat stream data dari file lokal karena proteksi CORS browser. Solusinya web ini wajib kamu deploy.');
+  }
 }
 
-// =====================
-// PLAY PREVIEW
-// =====================
 function playTrack(e, id) {
   e.stopPropagation();
-  // Scroll to now playing
-  const el = document.getElementById('nowPlaying');
-  if (!currentTrack || currentTrack.id !== id) {
-    // Find track in list
-    const card = document.querySelector(`[data-id="${id}"]`);
-    if (card) card.click();
+  const card = document.querySelector(`[data-id="${id}"]`);
+  if (card) {
+    if (currentTrack && card.classList.contains('active')) {
+      togglePlay();
+    } else {
+      card.click();
+    }
   }
-  el.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('nowPlaying').scrollIntoView({ behavior: 'smooth' });
 }
 
 // =====================
-// DOWNLOAD
+// DOWNLOAD EXECUTOR
 // =====================
-async function downloadTrack(format) {
+async function downloadTrack() {
   if (!currentTrack) {
-    showStatus('dlStatus', 'error', '❌ Pilih lagu dulu!');
+    showStatus('dlStatus', 'error', '❌ Silakan pilih lagu terlebih dahulu!');
     return;
   }
 
-  const query = `${currentTrack.name} ${currentTrack.artists.map(a=>a.name).join(' ')}`;
-  showStatus('dlStatus', 'loading', `<i class="fas fa-spinner fa-spin"></i> Mencari & memproses ${format.toUpperCase()}...`);
+  showStatus('dlStatus', 'loading', `<i class="fas fa-spinner fa-spin"></i> Menyiapkan tautan unduhan...`);
 
   try {
-    // Pakai API cobain dulu lewat yt-dlp wrapper publik
-    // Alternatif: pakai y2mate, rapidapi, atau backend sendiri
-    const apiUrl = `https://api.fabdl.com/spotify/get?url=https://open.spotify.com/track/${currentTrack.id}`;
-    const res = await fetch(apiUrl);
-    const data = await res.json();
+    let finalDownloadUrl = currentTrack.targetAudioUrl;
 
-    if (data && data.result && data.result.download_url) {
-      showStatus('dlStatus', 'success', '✅ Siap download! Klik link di bawah.');
-      const a = document.createElement('a');
-      a.href = data.result.download_url;
-      a.download = `${currentTrack.name} - ${currentTrack.artists[0].name}.${format}`;
-      a.target = '_blank';
-      a.click();
-    } else {
-      // Fallback: buka di Spotify web
-      fallbackDownload(query, format);
+    if (!finalDownloadUrl) {
+      const res = await fetch(`${BASE_URL}${encodeURIComponent(currentTrack.computedLink)}`);
+      const data = await res.json();
+
+      if (data && data.songs && data.songs[0] && data.songs[0].url) {
+        finalDownloadUrl = data.songs[0].url;
+      } else if (data && data.result && data.result.url) {
+        finalDownloadUrl = data.result.url;
+      }
     }
-  } catch(e) {
-    fallbackDownload(query, format);
+
+    if (finalDownloadUrl) {
+      showStatus('dlStatus', 'success', `✅ Tautan siap! <a href="${finalDownloadUrl}" target="_blank" style="color:var(--green); font-weight:bold; text-decoration:underline;">Klik di sini untuk unduh langsung</a>`);
+      window.open(finalDownloadUrl, '_blank');
+    } else {
+      showStatus('dlStatus', 'error', '❌ Gagal memproses data download.');
+    }
+  } catch (e) {
+    showStatus('dlStatus', 'error', '❌ Terjadi kesalahan sistem saat mendownload akibat file dijalankan lokal.');
   }
-}
-
-function fallbackDownload(query, format) {
-  // Fallback ke y2mate search
-  const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-  showStatus('dlStatus', 'error', 
-    `⚠️ API download tidak tersedia langsung. <br>
-    <a href="${ytUrl}" target="_blank" style="color:var(--green)">
-      <i class="fas fa-external-link-alt"></i> Cari di YouTube
-    </a> lalu download manual pakai yt-dlp atau y2mate.`
-  );
-}
-
-// =====================
-// UTILS
-// =====================
-function msToTime(ms) {
-  const m = Math.floor(ms / 60000);
-  const s = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
-  return `${m}:${s}`;
 }
 
 function showStatus(id, type, msg) {
